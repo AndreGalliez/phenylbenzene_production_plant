@@ -1,0 +1,5 @@
+{"max_iterations": 1000,
+"convergence_threshold": 0.0010,
+"rec_stream_initial_guess" : 0.0,
+"rec_compositions_initial_guess" : 0.0
+}
