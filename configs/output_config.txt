@@ -1,0 +1,28 @@
+RESULTADOS ENCONTRADOS 
+########################################## 
+ENTRADA NO REATOR
+Fo': F1, 
+X_a,o': X10, 
+X_b,o': X11, 
+X_c,o': X12, 
+X_d,o': X13
+SAIDA DO REATOR
+F_Rout: F2, 
+X_a,Rout: X20, 
+X_b,Rout: X21, 
+X_c,Rout: X22, 
+X_d,Rout: X23
+CORRENTE LIQUIDA DO FLASH
+F_Fdown: F3, 
+X_a,Fdown: X30, 
+X_b,Fdown: X31, 
+X_c,Fdown: X32, 
+X_d,Fdown: X33
+CORRENTE GASOSA DO FLASH
+F_Fup: F4, 
+X_a,Fup: X20, 
+X_b,Fup: X41, 
+X_c,Fup: X42, 
+X_d,Fup: X43
+VAZÃO DE RECICLO
+F_Rec: F6

@@ -1,4 +1,4 @@
-from entities.simulate import Iteration
+from entities.chemicalProcess import ChemicalProcess
 
 class Simulation:
 
@@ -47,26 +47,27 @@ class Simulation:
         if round(input['Xoa']+input['Xob']+input['Xoc']+input['Xod'],4) != 1.0000: problem_inputs.append("Molar ratios do not sum zero. Check compositions inserted.")
         return problem_inputs
 
-
+    def calculate_results(self):
+        N_iteration=0
+        while self.max_iterations > N_iteration:
+            simul = ChemicalProcess(self.rec_stream_initial_guess,self.rec_compositions_initial_guess)
+            simul.evaluate(self.Fo,self.Win,self.Vr,self.Pr,self.Tr,
+                            self.reaction_coefficients,self.reaction_model,self.Kor,self.Ea,
+                            self.lv_equilibrum_model,self.Pf,self.lv_methodinput,self.Cs)
+            self.rec_stream_initial_guess = simul.F[6]
+            self.rec_compositions_initial_guess = simul.W[6]
+            if simul.residual < self.convergence_threshold:
+                print('Rodou legal')
+                return simul
+            N_iteration = N_iteration+1
+        return None
+    
     def run_simulation(self):
         if len(self.problem_inputs) > 0:
             self.write_warning()
             return None
-        N_iteration=0
-        while self.max_iterations > N_iteration:
-            simul = Iteration(self.rec_stream_initial_guess,self.rec_compositions_initial_guess)
-            simul.evaluate(self.Fo,self.Win,self.Vr,self.Pr,self.Tr,
-                            self.reaction_coefficients,self.reaction_model,self.Kor,self.Ea,
-                            self.lv_equilibrum_model,self.Pf,self.lv_methodinput,self.Cs)
-            simul.evaluate_residual()
-            self.rec_stream_initial_guess = simul.F[6]
-            self.rec_compositions_initial_guess = simul.W[6]
-            eps = simul.residual
-            if eps < self.convergence_threshold:
-                print('Rodou legal')
-                return None
-            N_iteration = N_iteration+1
-        print('Deu bill')
+        last_iteration = self.calculate_results()
+        self.write_output(last_iteration)
 
     def write_warning(self):
         f = open("warning.txt", "w")
@@ -74,4 +75,31 @@ class Simulation:
             f.write(warning + "\n")
         f.close()
 
-    # def write_outputs(self,output):
+    def write_output(self,last_iteration_data):
+        f = open("output.txt", "w")
+        if last_iteration_data == None:
+            f.write("Calculation did not converge.")
+        else:
+            data_to_write = self.format_output(last_iteration_data)
+            f.write(data_to_write)
+        f.close()
+
+    def format_output(self,last_iteration_data):
+        template = self.get_output_template()
+        output_text = self.fill_output_text(template,last_iteration_data)
+        return output_text
+
+    def get_output_template(self):
+        f2 = open("./configs/output_config.txt", "r")
+        output_template = f2.read()
+        return output_template
+
+    def fill_output_text(self,output_text,last_iteration_data):
+        for i in range(len(last_iteration_data.F)):
+            output_text = output_text.replace(f"F{i}",self.format_result_numbers(last_iteration_data.F[i]))
+            for j in range(len(last_iteration_data.W[0])):
+                output_text = output_text.replace(f"X{i}{j}",self.format_result_numbers(last_iteration_data.W[i][j]))
+        return output_text
+
+    def format_result_numbers(self,x):
+        return str(round(x,3))

@@ -1,6 +1,6 @@
 import numpy as np
 
-class Iteration:
+class ChemicalProcess:
 
     def __init__(self,Frecycle_guess,Wrecycle_guess):
         self.Frecycle_guess = Frecycle_guess
@@ -64,6 +64,7 @@ class Iteration:
         self.calculate_reactor(self.F[1], self.W[1], Vr, Pr, Tr, reactionCoefficients, reactionModel, Kor, Er)
         self.calculate_flash(self.F[2], self.W[2], lv_equilibrum_model, lv_model_inputs, Pe)
         self.calculate_splitter(self.F[4],self.W[4],Cs)
+        self.evaluate_residual()
 
     def evaluate_residual(self):
         if self.F[6] == 0.0:
