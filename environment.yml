@@ -1,0 +1,9 @@
+name: fenylbenzene_prod
+channels:
+  - conda-forge
+  - defaults
+  - mro
+dependencies:
+  - python = 3.7.1
+  - numpy = 1.21.1
+  - scipy = 1.4.1

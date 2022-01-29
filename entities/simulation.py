@@ -34,16 +34,16 @@ class Simulation:
 
     def validate_inputs(self,input):
         problem_inputs = []
-        if input['Fo'] > 200 or input['Fo'] < 50: problem_inputs.append("Fo inserted out of avaliable range")
-        if input['Pr'] > 14 or input['Pr'] < 10: problem_inputs.append("Pr inserted out of avaliable range")
-        if input['Tr'] > 1250 or input['Tr'] < 850: problem_inputs.append("Tr inserted out of avaliable range")
-        if input['Pf'] > 7 or input['Pf'] < 3: problem_inputs.append("Pf inserted out of avaliable range")
-        if input['Tf'] > 700 or input['Tf'] < 300: problem_inputs.append("Tf inserted out of avaliable range")
-        if input['Cs'] > 0.8 or input['Cs'] < 0: problem_inputs.append("Cs inserted out of avaliable range")
-        if input['Xoa'] > 1 or input['Xoa'] < 0: problem_inputs.append("Xoa inserted out of avaliable range")
-        if input['Xob'] > 1 or input['Xob'] < 0: problem_inputs.append("Xob inserted out of avaliable range")
-        if input['Xoc'] > 1 or input['Xoc'] < 0: problem_inputs.append("Xoc inserted out of avaliable range")
-        if input['Xod'] > 1 or input['Xod'] < 0: problem_inputs.append("Xod inserted out of avaliable range")
+        if input['Fo'] > 200 or input['Fo'] < 50: problem_inputs.append("Fo inserted out of allowed range.")
+        if input['Pr'] > 14 or input['Pr'] < 10: problem_inputs.append("Pr inserted out of allowed range.")
+        if input['Tr'] > 1250 or input['Tr'] < 850: problem_inputs.append("Tr inserted out of allowed range.")
+        if input['Pf'] > 7 or input['Pf'] < 3: problem_inputs.append("Pf inserted out of allowed range.")
+        if input['Tf'] > 700 or input['Tf'] < 300: problem_inputs.append("Tf inserted out of allowed range.")
+        if input['Cs'] > 0.8 or input['Cs'] < 0: problem_inputs.append("Cs inserted out of allowed range.")
+        if input['Xoa'] > 1 or input['Xoa'] < 0: problem_inputs.append("Xoa inserted out of allowed range.")
+        if input['Xob'] > 1 or input['Xob'] < 0: problem_inputs.append("Xob inserted out of allowed range.")
+        if input['Xoc'] > 1 or input['Xoc'] < 0: problem_inputs.append("Xoc inserted out of allowed range.")
+        if input['Xod'] > 1 or input['Xod'] < 0: problem_inputs.append("Xod inserted out of allowed range.")
         if round(input['Xoa']+input['Xob']+input['Xoc']+input['Xod'],4) != 1.0000: problem_inputs.append("Molar ratios do not sum zero. Check compositions inserted.")
         return problem_inputs
 

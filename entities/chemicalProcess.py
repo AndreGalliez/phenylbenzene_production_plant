@@ -41,12 +41,12 @@ class ChemicalProcess:
 
     @staticmethod
     def get_LVequilibrium_constant(equilibrum_model, model_inputs):
-        from entities.separationprocesses import LiquidVaporEquilibriumConstant
+        from entities.flash import LiquidVaporEquilibriumConstant
         equilibriumConstantSetter=LiquidVaporEquilibriumConstant(equilibrum_model, model_inputs)
         return equilibriumConstantSetter.calc_psats()
 
     def calculate_flash(self, Fin, Win, equilibrum_model, model_inputs, P):
-        from entities.separationprocesses import Flash
+        from entities.flash import Flash
         flash=Flash("PT", Fin, Win, self.get_LVequilibrium_constant(equilibrum_model, model_inputs), P)
         flash.evaluate_flash_PT(0.6) ##initial guess for linear system 
         self.F[3]=flash.L
