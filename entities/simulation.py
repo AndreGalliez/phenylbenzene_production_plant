@@ -37,7 +37,7 @@ class Simulation:
         if input['Fo'] > 200 or input['Fo'] < 50: problem_inputs.append("Fo inserted out of allowed range.")
         if input['Pr'] > 14 or input['Pr'] < 10: problem_inputs.append("Pr inserted out of allowed range.")
         if input['Tr'] > 1250 or input['Tr'] < 850: problem_inputs.append("Tr inserted out of allowed range.")
-        if input['Pf'] > 7 or input['Pf'] < 3: problem_inputs.append("Pf inserted out of allowed range.")
+        if input['Pf'] > 12 or input['Pf'] < 3: problem_inputs.append("Pf inserted out of allowed range.")
         if input['Tf'] > 700 or input['Tf'] < 300: problem_inputs.append("Tf inserted out of allowed range.")
         if input['Cs'] > 0.8 or input['Cs'] < 0: problem_inputs.append("Cs inserted out of allowed range.")
         if input['Xoa'] > 1 or input['Xoa'] < 0: problem_inputs.append("Xoa inserted out of allowed range.")

@@ -20,7 +20,7 @@ X_c,Fdown: X32,
 X_d,Fdown: X33
 CORRENTE GASOSA DO FLASH
 F_Fup: F4, 
-X_a,Fup: X20, 
+X_a,Fup: X40, 
 X_b,Fup: X41, 
 X_c,Fup: X42, 
 X_d,Fup: X43
