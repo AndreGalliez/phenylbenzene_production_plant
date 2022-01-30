@@ -1,6 +1,0 @@
-Pr inserted out of avaliable range
-Pf inserted out of avaliable range
-Tf inserted out of avaliable range
-Xoa inserted out of avaliable range
-Xoc inserted out of avaliable range
-Molar ratios do not sum zero. Check compositions inserted.

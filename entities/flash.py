@@ -2,13 +2,30 @@ import numpy as np
 from scipy.optimize import fsolve, newton
 
 class Flash: ##Faz o cálculo de flash para quando as condições de equilibrio e composição na entrada são conhecidas
-    def __init__(self, _type, Fin, z, p_sat, p_or_beta):
-        if _type == 'PT':
-            self.P = p_or_beta
-            self.B = None
-        elif _type == 'ZB':
-            self.B = p_or_beta
-            self.P = None
+    """
+        Responsável por realizar os cálculos referentes ao tanque de flash.
+        Argumentos:
+            P (float): Pressão de equilibrio no tanque de flash.
+            Fin (float): Vazão de entrada.
+            Z (numpy(float): Composições de entrada. Precisa ser um numpy, vai sofrer operações algébricas bidimensionais.
+            P_sat (list(float)): Lista com o P_sat de cada componente. 
+        Atributos:
+            K (list(float)): Lista com as constantes de equilibrio líquido/vapor (P_sat/P) de cada componente.
+            L (float): Vazão da corrente líquida de saída (a ser calculado).
+            V (float): Vazão da corrente gasosa de saída (a ser calculado).
+            X (list(float)): Composições da corrente líquida de saída (a ser calculado).
+            Y (list(float)): Composições da corrente gasosa de saída (a ser calculado).
+        Métodos:
+            evaluate_K()
+                : Faz as contas atualização o parâmetro K.
+            formulate_equations_PT()
+                : Formula a equação de Rashford-Rice a ser resolvida.
+            evaluate_flash()
+                : Resolve a equação de Rashford-Rice e calcula os valores das vazões e composições de saída.
+    """
+
+    def __init__(self, Fin, z, p_sat, P):
+        self.P = P
         self.Fin = Fin
         self.Z = z
         self.P_sat = p_sat
@@ -23,30 +40,29 @@ class Flash: ##Faz o cálculo de flash para quando as condições de equilibrio 
             self.K.append(Pi_sat/self.P)
                
     def formulate_equations_PT(self, x):
+        """
+            Formula a equação de Rashford-Rice a ser resolvida que vai ser passada para um solver do scipy.
+            Argumentos:
+                x (float): Chute inicial para o parâmetro beta a ser encontrado.
+            Retorna:
+                Valor do resíduo da equação de Rashford-Rice a ser avaliado pelo solver do scipy .
+        """
         f=0.0
         for i in range(len(self.Z)):
             f=f+self.Z[i]*self.K[i]/(1+x*(self.K[i]-1))
         return f-1
 
     def evaluate_flash_PT(self, x_in):
+        """
+            Resolve a equação de Rashford-Rice e calcula os valores das vazões e composições de saída.
+            Chama a função formulate_equations_PT, passa o valor do resíduo para a função newton do scipy que resolve a equação não-linear.
+            Na sequência calcula os atributos das correntes de saida e atualiza os parâmetros.
+            Argumentos:
+                x (float): Chute inicial para o parâmetro beta a ser encontrado.
+
+        """
         self.evaluate_K()
         self.B = newton(self.formulate_equations_PT, x_in)
-        for i in range(len(self.Z)):
-            self.Y[i] = self.Z[i]*self.K[i]/(1+self.B*(self.K[i]-1))
-        for i in range(len(self.Z)):
-            self.X[i]= self.Y[i]/self.K[i]
-        self.L=self.Fin*(1-self.B)
-        self.V=self.Fin-self.L
-
-    def formulate_equations_ZB(self, x):
-        f=0.0
-        for i in range(len(self.Z)):
-            f=f+self.Z[i]*(self.P_sat[i]/x)/(1+self.B*((self.P_sat[i]/x)-1))
-        return f-1
-
-    def evaluate_flash_ZB(self, x_in):
-        self.P = fsolve(self.formulate_equations_ZB, x_in,maxiter=500)
-        self.evaluate_K()
         for i in range(len(self.Z)):
             self.Y[i] = self.Z[i]*self.K[i]/(1+self.B*(self.K[i]-1))
         for i in range(len(self.Z)):
@@ -56,42 +72,65 @@ class Flash: ##Faz o cálculo de flash para quando as condições de equilibrio 
     
    
 class LiquidVaporEquilibriumConstant:
-    def __init__(self, model, model_input):
-        self.model = model
+    """
+        Responsável por calcular as pressoes de saturação de cada um dos componentes dada uma temperatura T.
+        Argumentos:
+            T (float): Temperatura de equilibrio no tanque de flash.
+            elv_coefficients list((list(float))): Lista de listas com os coeficientes de cada componente a ser utilizado na correlação empírica usada para calcular P_sat.
+                                                    Podem ser referentes à equação de Antoine ou Wagner. 
+                                                    A equação de Antoine é usada para os componentes de A-C e a de Wagner para o componente D.
+        Atributos:
+            P_sat (list(float): Pressões de saturação de cada um dos componentes a serem calculadas.
+        Métodos:
+            antoine_method(singleComponentCoefficients)
+                : Implementa a correlação de Antoine para calcular P_sat.
+            wagner_method(singleComponentCoefficients)
+                : Implementa a correlação de Wagner para calcular P_sat.
+            calc_psats()
+                : Realiza os calculos para todos os componentes e atualiza os valores de Fout e Wout.
+    """
+    
+    def __init__(self, T, elv_coefficients):
         self.P_sat = None
-        if model == 'Raoult and Antoine':
-            self.T=model_input[0]
-            self.elv_coefficients=model_input[1]
-        elif model == 'Raoult and Other':
-            self.T=model_input[0]
-            self.elv_coefficients=model_input[1]
+        self.T=T
+        self.elv_coefficients=elv_coefficients
             
 
     ##O metodo implementado usa Pressao em psia e temperatura em farenheit
     ##A equação de Antoine utilizada usa a Pressão crítica do componente como pressão de referência
     @staticmethod
     def antoine_method(T,singleComponentCoefficients):
+        """
+        Implementa a correlação de Antoine para calcular P_sat.
+        Argumentos:
+            singleComponentCoefficients (list(float)): Lista com os parametros da equação de um componente.
+        Retorna:
+            P_sat de um componente segundo os coeficientes fornecidos.
+        """
         pi_sat = singleComponentCoefficients[3]*(np.exp(singleComponentCoefficients[0]-singleComponentCoefficients[1]/(T+singleComponentCoefficients[2])))
         return pi_sat
     
     ##O metodo implementado usa Pressao em Pascal e temperatura em Kelvin
     @staticmethod 
-    def forgot_name_method(T,singleComponentCoefficients):
+    def wagner_method(T,singleComponentCoefficients):
+        """
+        Implementa a correlação de Wagner para calcular P_sat.
+        Argumentos:
+            singleComponentCoefficients (list(float)): Lista com os parametros da equação de um componente.
+        Retorna:
+            P_sat de um componente segundo os coeficientes fornecidos.
+        """
         pi_sat= 1000*(np.exp(singleComponentCoefficients[0]*np.log(T)+(singleComponentCoefficients[1]/T) +singleComponentCoefficients[2]+singleComponentCoefficients[3]*(T**2)))
         return pi_sat
 
     def calc_psats(self):
         P_sat=list()
-        if self.model == 'Raoult and Antoine':    
-            for singleComponentCoefficients in self.elv_coefficients:
-                P_sat.append(self.antoine_method(self.T,singleComponentCoefficients))
-        elif self.model == 'Raoult and Other':
-            for i in range(len(self.elv_coefficients)):
-                singleComponentCoefficients = self.elv_coefficients[i]
-                if i in [0,1,2]:
-                    P_sat.append(6894.76*self.antoine_method(((self.T - 273.15) * (9/5) + 32),singleComponentCoefficients))
-                else:
-                    P_sat.append(self.forgot_name_method(self.T,singleComponentCoefficients))
+        for i in range(len(self.elv_coefficients)):
+            singleComponentCoefficients = self.elv_coefficients[i]
+            if i in [0,1,2]:
+                P_sat.append(6894.76*self.antoine_method(((self.T - 273.15) * (9/5) + 32),singleComponentCoefficients))
+            else:
+                P_sat.append(self.wagner_method(self.T,singleComponentCoefficients))
         self.P_sat = P_sat
         return P_sat
         ##Print das Pressoes e Constantes de Equilibrio

@@ -14,4 +14,4 @@ with open('input.json', 'r') as f:
 simulation = Simulation(input,sys_configs,process_configs)
 simulation.run_simulation()
 
-print('fim')
+print('Programa executado com sucesso.')
